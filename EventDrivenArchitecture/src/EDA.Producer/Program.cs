@@ -36,16 +36,22 @@ app.MapPost("/orders", HandleCreateOrder)
     .WithName("CreateOrder")
     .WithOpenApi();
 
+app.MapPost("/orders/{id:int}/complete", HandleCompleteOrder)
+    .WithName("CompleteOrder")
+    .WithOpenApi();
+
 app.Run();
 
 static async Task<Order> HandleCreateOrder(CreateOrderRequest request, IOrders orders, IEventPublisher events)
 {
     var order = await orders.New(request.CustomerId);
 
-    await events.Publish(new OrderCreatedEvent()
-    {
-        OrderId = order.OrderId
-    });
+    return order;
+}
+
+static async Task<Order> HandleCompleteOrder(CompleteOrderRequest request, IOrders orders, IEventPublisher events)
+{
+    var order = await orders.Complete(request.OrderId);
 
     return order;
 }
